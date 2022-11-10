@@ -4,7 +4,9 @@
     some handy operations for vectors and matrix math
 */
 
-use std::ops::{Add, Sub, Mul, Div, Index, IndexMut, AddAssign, SubAssign, MulAssign, DivAssign, Neg};
+use std::ops::{
+    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+};
 
 // vector 2 type
 #[derive(Debug, Copy, Clone)]
@@ -249,7 +251,6 @@ impl Neg for Vec2 {
     }
 }
 
-
 // Vector 3 type
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
@@ -264,8 +265,20 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
+    pub fn one() -> Vec3 {
+        Vec3 {
+            x: 1.0,
+            y: 1.0,
+            z: 1.0,
+        }
+    }
+
     pub fn zero() -> Vec3 {
-        Vec3 { x: 0.0, y: 0.0, z: 0.0 }
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
     }
 
     pub fn dot(&self, other: &Vec3) -> f32 {
@@ -464,8 +477,6 @@ impl IndexMut<usize> for Vec3 {
     }
 }
 
-
-
 // Matrix 4x4 type
 #[derive(Debug, Copy, Clone)]
 pub struct Mat4 {
@@ -546,9 +557,24 @@ impl Mat4 {
         let t = 1.0 - c;
         Mat4 {
             m: [
-                [t * a.x * a.x + c, t * a.x * a.y - s * a.z, t * a.x * a.z + s * a.y, 0.0],
-                [t * a.x * a.y + s * a.z, t * a.y * a.y + c, t * a.y * a.z - s * a.x, 0.0],
-                [t * a.x * a.z - s * a.y, t * a.y * a.z + s * a.x, t * a.z * a.z + c, 0.0],
+                [
+                    t * a.x * a.x + c,
+                    t * a.x * a.y - s * a.z,
+                    t * a.x * a.z + s * a.y,
+                    0.0,
+                ],
+                [
+                    t * a.x * a.y + s * a.z,
+                    t * a.y * a.y + c,
+                    t * a.y * a.z - s * a.x,
+                    0.0,
+                ],
+                [
+                    t * a.x * a.z - s * a.y,
+                    t * a.y * a.z + s * a.x,
+                    t * a.z * a.z + c,
+                    0.0,
+                ],
                 [0.0, 0.0, 0.0, 1.0],
             ],
         }
@@ -582,7 +608,12 @@ impl Mat4 {
             m: [
                 [f / aspect, 0.0, 0.0, 0.0],
                 [0.0, f, 0.0, 0.0],
-                [0.0, 0.0, (far + near) / (near - far), (2.0 * far * near) / (near - far)],
+                [
+                    0.0,
+                    0.0,
+                    (far + near) / (near - far),
+                    (2.0 * far * near) / (near - far),
+                ],
                 [0.0, 0.0, -1.0, 0.0],
             ],
         }
@@ -591,8 +622,18 @@ impl Mat4 {
     pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Mat4 {
         Mat4 {
             m: [
-                [2.0 / (right - left), 0.0, 0.0, (left + right) / (left - right)],
-                [0.0, 2.0 / (top - bottom), 0.0, (bottom + top) / (bottom - top)],
+                [
+                    2.0 / (right - left),
+                    0.0,
+                    0.0,
+                    (left + right) / (left - right),
+                ],
+                [
+                    0.0,
+                    2.0 / (top - bottom),
+                    0.0,
+                    (bottom + top) / (bottom - top),
+                ],
                 [0.0, 0.0, 2.0 / (near - far), (near + far) / (near - far)],
                 [0.0, 0.0, 0.0, 1.0],
             ],
@@ -600,6 +641,7 @@ impl Mat4 {
     }
 
     pub fn look_at(eye: Vec3, center: Vec3, up: Vec3) -> Mat4 {
+        // A direct translation of the GLM implementation
         let f = (center - eye).normalize();
         let s = f.cross(&up).normalize();
         let u = s.cross(&f);
@@ -641,7 +683,6 @@ impl Mat4 {
     pub fn grotation(x: f32, y: f32, z: f32) -> Mat4 {
         Mat4::rotation_x(x) * Mat4::rotation_y(y) * Mat4::rotation_z(z)
     }
-
 }
 
 impl Mul for Mat4 {
@@ -668,10 +709,7 @@ impl Mul<Mat4> for Vec3 {
     fn mul(self, rhs: Mat4) -> Vec3 {
         let mut v = [0.0; 4];
         for i in 0..4 {
-            v[i] = self.x * rhs.m[0][i]
-                + self.y * rhs.m[1][i]
-                + self.z * rhs.m[2][i]
-                + rhs.m[3][i];
+            v[i] = self.x * rhs.m[0][i] + self.y * rhs.m[1][i] + self.z * rhs.m[2][i] + rhs.m[3][i];
         }
         Vec3::new(v[0], v[1], v[2])
     }
